@@ -1,0 +1,68 @@
+server:
+  port: 8085
+
+spring:
+  application:
+    name: ticketgo-order
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3307/ticketgo?useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=utf8&allowPublicKeyRetrieval=true
+    username: root
+    password: ${TICKETGO_DB_PASSWORD:root123456}
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+  kafka:
+    bootstrap-servers: 127.0.0.1:9092
+    consumer:
+      group-id: order-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+    listener:
+      ack-mode: record
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      id-type: input
+
+ticketgo:
+  kafka:
+    order-topic: order-created
+  order:
+    pay-expire-minutes: 15
+
+logging:
+  level:
+    com.ticketgo: debug
+
+# ---- Seata（默认关闭，使用 --spring.profiles.active=seata 启用�?---
+seata:
+  enabled: false
+---
+spring:
+  config:
+    activate:
+      on-profile: seata
+seata:
+  enabled: true
+  application-id: ticketgo-order
+  tx-service-group: ticketgo-tx-group
+  service:
+    vgroup-mapping:
+      ticketgo-tx-group: default
+  registry:
+    type: nacos
+    nacos:
+      server-addr: 127.0.0.1:8848
+      application: seata-server
+      group: DEFAULT_GROUP

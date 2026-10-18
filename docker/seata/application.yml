@@ -1,0 +1,27 @@
+server:
+  port: 7091
+
+spring:
+  application:
+    name: seata-server
+
+logging:
+  file:
+    path: ./logs/seata
+  level:
+    io.seata: info
+
+seata:
+  config:
+    type: file
+  registry:
+    type: nacos
+    nacos:
+      application: seata-server
+      server-addr: nacos:8848
+      group: DEFAULT_GROUP
+      namespace: ""
+  store:
+    mode: file
+  server:
+    service-port: 8091

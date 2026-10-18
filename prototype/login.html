@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TicketGo · 登录</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="ink">
+  <div class="mountain"></div>
+  <div class="poem">此曲只应天上有，人间能得几回闻</div>
+  <div class="seal">票韵</div>
+  <div class="petal" style="left:12%; animation-delay:0s"></div>
+  <div class="petal" style="left:38%; animation-delay:3s"></div>
+  <div class="petal" style="left:64%; animation-delay:6s"></div>
+  <div class="petal" style="left:86%; animation-delay:9s"></div>
+
+  <div class="ink-card">
+    <div class="seal-logo">票韵</div>
+    <div class="brand">票韵</div>
+    <div class="brand-en">T I C K E T G O</div>
+    <div class="brush"></div>
+
+    <div class="ink-tabs">
+      <span class="active">密码登录</span>
+      <span>验证码登录</span>
+    </div>
+
+    <div class="ink-field">
+      <span class="fi">📱</span>
+      <input class="ink-input" placeholder="请输入手机号">
+    </div>
+    <div class="ink-field">
+      <span class="fi">🔒</span>
+      <input class="ink-input" type="password" placeholder="请输入密码">
+    </div>
+
+    <!-- 验证码登录时显示 -->
+    <div class="captcha-row">
+      <div class="ink-field" style="flex:1; margin:0;">
+        <span class="fi">🔐</span>
+        <input class="ink-input" placeholder="图形验证码">
+      </div>
+      <div class="captcha-box">A7K9</div>
+    </div>
+
+    <button class="ink-sub">登 录</button>
+
+    <div class="ink-aux">
+      <label><input type="checkbox" style="vertical-align:middle"> 记住我</label>
+      <a href="#">忘记密码？</a>
+    </div>
+
+    <div class="ink-divider">其他登录方式</div>
+    <div class="ink-social">
+      <span title="微信">💬</span>
+      <span title="微博">🌐</span>
+      <span title="QQ">🐧</span>
+    </div>
+
+    <div class="ink-aux" style="justify-content:center; margin-top:20px; display:block;">
+      还没有账号？<a href="#" style="color:var(--primary)">立即注册</a>
+    </div>
+  </div>
+</body>
+</html>

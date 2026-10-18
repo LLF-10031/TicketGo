@@ -1,0 +1,67 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: ticketgo-gateway
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+    gateway:
+      discovery:
+        locator:
+          enabled: false
+      routes:
+        - id: user-service
+          uri: lb://ticketgo-user
+          predicates:
+            - Path=/api/user/**,/api/captcha,/api/sms/**
+        - id: product-service
+          uri: lb://ticketgo-product
+          predicates:
+            - Path=/api/product/**,/api/session/**,/api/file/**
+        - id: seat-service
+          uri: lb://ticketgo-seat
+          predicates:
+            - Path=/api/seat/**
+        - id: seckill-service
+          uri: lb://ticketgo-seckill
+          predicates:
+            - Path=/api/seckill/**
+        - id: order-service
+          uri: lb://ticketgo-order
+          predicates:
+            - Path=/api/order/**,/ws/**
+        - id: cart-service
+          uri: lb://ticketgo-cart
+          predicates:
+            - Path=/api/cart/**
+        - id: coupon-service
+          uri: lb://ticketgo-coupon
+          predicates:
+            - Path=/api/coupon/**
+        - id: payment-service
+          uri: lb://ticketgo-payment
+          predicates:
+            - Path=/api/payment/**
+        - id: notification-service
+          uri: lb://ticketgo-notification
+          predicates:
+            - Path=/api/notification/**
+        - id: admin-product
+          uri: lb://ticketgo-product
+          predicates:
+            - Path=/api/admin/product/**,/api/admin/session/**,/api/admin/tier/**
+        - id: admin-coupon
+          uri: lb://ticketgo-coupon
+          predicates:
+            - Path=/api/admin/coupon-template/**,/api/admin/coupon/**
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+
+logging:
+  level:
+    com.ticketgo: debug

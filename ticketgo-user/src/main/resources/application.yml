@@ -1,0 +1,38 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: ticketgo-user
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3307/ticketgo?useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=utf8&allowPublicKeyRetrieval=true
+    username: root
+    password: ${TICKETGO_DB_PASSWORD:root123456}
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      id-type: input
+
+ticketgo:
+  jwt:
+    secret: ${TICKETGO_JWT_SECRET:TicketGo@DevSecretKey#2026$ChangeMeAtLeast32Chars!}
+    access-ttl-seconds: 900
+    refresh-ttl-seconds: 604800
+  sms:
+    provider: mock
+
+logging:
+  level:
+    com.ticketgo: debug

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TicketGo · 我的订单</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo"><span class="dot"></span>TicketGo</div>
+      <div class="search"><input placeholder="搜索演出、艺人、场馆"><button>搜索</button></div>
+      <div class="header-right">
+        <span class="icon">优惠券</span>
+        <div class="avatar-wrap">
+          <div class="avatar">明</div>
+          <div class="dropdown">
+            <div class="dropdown-head"><div class="avatar">明</div><div><div class="name">小明</div><div class="sub">订单 3 · 券 2</div></div></div>
+            <a href="#">个人中心</a><a href="orders.html">我的订单</a><a href="#">我的券包</a><a href="login.html" class="logout">退出登录</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="order-layout">
+      <aside class="side-menu">
+        <a href="#">个人中心</a>
+        <a href="orders.html" class="active">我的订单</a>
+        <a href="#">我的券包</a>
+        <a href="#">我的收藏</a>
+        <a href="#">开票提醒</a>
+        <a href="#">账号安全</a>
+      </aside>
+
+      <main>
+        <div class="section-title"><h2>我的订单</h2></div>
+
+        <div class="order-card">
+          <div class="oc-head"><span>订单号：2026010112300001</span><span>2026-01-01 12:30</span></div>
+          <div class="oc-body">
+            <div class="oc-thumb"></div>
+            <div style="flex:1">
+              <div style="font-weight:600; margin-bottom:6px;">周杰伦「嘉年华」演唱会 · 看台票</div>
+              <div style="color:var(--text-3); font-size:13px;">北京 · 国家体育场 · 2026-06-20 19:30</div>
+              <div style="margin-top:8px;"><span class="tag">满200减50</span> 实付 <b class="price" style="color:var(--primary)">¥530</b></div>
+            </div>
+            <div style="text-align:right">
+              <div class="status-pill pending">待支付</div>
+              <div style="font-size:13px; color:var(--text-3); margin-top:6px;">剩余 12:30</div>
+            </div>
+          </div>
+          <div class="oc-actions">
+            <button class="btn btn-ghost">取消订单</button>
+            <button class="btn btn-primary">立即支付</button>
+          </div>
+        </div>
+
+        <div class="order-card">
+          <div class="oc-head"><span>订单号：2025122811000007</span><span>2025-12-28 11:00</span></div>
+          <div class="oc-body">
+            <div class="oc-thumb" style="background:linear-gradient(135deg,#c2e0ff,#99c2ff)"></div>
+            <div style="flex:1">
+              <div style="font-weight:600; margin-bottom:6px;">话剧《暗恋桃花源》 · 一楼池座 3排5座</div>
+              <div style="color:var(--text-3); font-size:13px;">杭州 · 大剧院 · 2026-03-15 19:30</div>
+            </div>
+            <div style="text-align:right"><div class="status-pill paid">已支付</div></div>
+          </div>
+          <div class="oc-actions">
+            <button class="btn btn-ghost">查看电子票</button>
+            <button class="btn btn-ghost">申请退款</button>
+          </div>
+        </div>
+
+        <div class="order-card">
+          <div class="oc-head"><span>订单号：2025122019000003</span><span>2025-12-20 19:00</span></div>
+          <div class="oc-body">
+            <div class="oc-thumb" style="background:linear-gradient(135deg,#d3f5d3,#a8e6a8)"></div>
+            <div style="flex:1">
+              <div style="font-weight:600; margin-bottom:6px;">沉浸式梵高艺术展 · 成人票 ×2</div>
+              <div style="color:var(--text-3); font-size:13px;">深圳 · 当代艺术中心 · 2025-12-25</div>
+            </div>
+            <div style="text-align:right"><div class="status-pill cancelled">已取消</div></div>
+          </div>
+        </div>
+      </main>
+    </div>
+    <div class="footer">TicketGo 演出票务平台 · 原型演示</div>
+  </div>
+</body>
+</html>

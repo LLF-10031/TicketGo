@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TicketGo Admin · 演出管理</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="admin">
+    <aside class="admin-side">
+      <div class="brand">TicketGo Admin</div>
+      <a href="#" class="active">演出管理</a>
+      <a href="#">场次/票档</a>
+      <a href="#">优惠券模板</a>
+      <a href="#">订单管理</a>
+      <a href="#">库存管理</a>
+      <a href="#">数据看板</a>
+      <a href="#">系统设置</a>
+    </aside>
+
+    <main class="admin-main">
+      <div class="admin-top">
+        <div class="crumb">首页 / 演出管理</div>
+        <div style="display:flex; align-items:center; gap:14px;">
+          <span style="color:var(--text-3)">消息</span>
+          <div class="avatar" style="width:32px;height:32px;font-size:13px">管</div>
+        </div>
+      </div>
+
+      <div class="admin-content">
+        <div class="panel">
+          <div class="filters">
+            <input placeholder="演出名称 / 关键词">
+            <select><option>全部状态</option><option>草稿</option><option>已上架</option><option>已售罄</option><option>已结束</option></select>
+            <select><option>全部分类</option><option>演唱会</option><option>话剧歌剧</option><option>体育赛事</option></select>
+            <button class="btn btn-primary">查询</button>
+            <button class="btn btn-ghost">重置</button>
+            <button class="btn btn-primary" style="margin-left:auto">+ 新建演出</button>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th><th>演出名称</th><th>分类</th><th>场馆</th><th>开票时间</th><th>状态</th><th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1001</td><td>周杰伦「嘉年华」演唱会</td><td>演唱会</td><td>国家体育场</td><td>2026-01-01 20:00</td>
+                <td><span class="tag">已上架</span></td>
+                <td><span class="link">编辑</span><span class="link">场次</span><span class="link">下架</span></td>
+              </tr>
+              <tr>
+                <td>1002</td><td>话剧《暗恋桃花源》</td><td>话剧歌剧</td><td>杭州大剧院</td><td>-</td>
+                <td><span class="tag gray">草稿</span></td>
+                <td><span class="link">编辑</span><span class="link">场次</span><span class="link">上架</span></td>
+              </tr>
+              <tr>
+                <td>1003</td><td>CBA 总决赛 G5</td><td>体育赛事</td><td>广州体育馆</td><td>2025-12-01 10:00</td>
+                <td><span class="tag gray">已售罄</span></td>
+                <td><span class="link">编辑</span><span class="link">场次</span><span class="link">下架</span></td>
+              </tr>
+              <tr>
+                <td>1004</td><td>沉浸式梵高艺术展</td><td>展览休闲</td><td>当代艺术中心</td><td>2025-11-15 10:00</td>
+                <td><span class="tag gray">已结束</span></td>
+                <td><span class="link">编辑</span><span class="link">场次</span></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div style="margin-top:16px; display:flex; justify-content:flex-end; gap:8px; color:var(--text-2); font-size:14px;">
+            <span>共 4 条</span>
+            <span class="link">上一页</span><span class="link" style="color:var(--primary)">1</span><span class="link">下一页</span>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

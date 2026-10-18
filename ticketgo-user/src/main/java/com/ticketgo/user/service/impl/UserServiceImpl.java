@@ -51,7 +51,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public CaptchaResponse getCaptcha() {
-        LineCaptcha captcha = CaptchaUtil.createLineCaptcha(120, 40, 4, 20);
+        LineCaptcha captcha = CaptchaUtil.createLineCaptcha(160, 48, 4, 24);
         String code = captcha.getCode();
         String captchaId = UUID.randomUUID().toString().replace("-", "");
         redisTemplate.opsForValue().set(RedisKeys.CAPTCHA + captchaId, code, CAPTCHA_TTL_SECONDS, TimeUnit.SECONDS);

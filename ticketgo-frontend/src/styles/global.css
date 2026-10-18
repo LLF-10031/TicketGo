@@ -1,4 +1,4 @@
-/* TicketGo 前端 — 全局样式（对齐 prototype/style.css，暖色调 + 大麦配色） */
+﻿/* TicketGo 鍓嶇 鈥?鍏ㄥ眬鏍峰紡锛堝榻?prototype/style.css锛屾殩鑹茶皟 + 澶ч害閰嶈壊锛?*/
 :root {
   --primary: #ff4b2b;
   --primary-2: #ff7a45;
@@ -16,7 +16,7 @@
   --shadow: 0 1px 8px rgba(120, 90, 60, 0.06);
   --shadow-hover: 0 10px 26px rgba(255, 75, 43, 0.16);
 
-  /* Element Plus 主题对齐大麦橙 */
+  /* Element Plus 涓婚瀵归綈澶ч害姗?*/
   --el-color-primary: #ff4b2b;
   --el-color-primary-light-3: #ff7a45;
   --el-color-primary-light-5: #ff9d75;
@@ -214,7 +214,7 @@ img { max-width: 100%; display: block; }
 /* Footer */
 .footer { text-align: center; color: var(--text-3); font-size: 13px; padding: 44px 0 30px; }
 
-/* ---------- 登录页（暖色 + 水墨国风） ---------- */
+/* ---------- 鐧诲綍椤碉紙鏆栬壊 + 姘村ⅷ鍥介锛?---------- */
 .ink {
   min-height: 100vh; margin: 0; display: flex; align-items: center; justify-content: center;
   font-family: 'KaiTi', 'STKaiti', 'Songti SC', serif;
@@ -287,12 +287,12 @@ img { max-width: 100%; display: block; }
 .captcha-row .ink-field { padding-left: 0; margin: 0; }
 .captcha-row .ink-field .ink-input { padding-left: 40px; }
 .captcha-box {
-  width: 112px; height: 48px; border-radius: 12px; background: #efe7da;
+  width: 160px; height: 48px; border-radius: 12px; background: #efe7da;
   display: flex; align-items: center; justify-content: center; letter-spacing: 5px;
   color: #7a6a58; cursor: pointer; font-family: 'Courier New', monospace; font-weight: 700;
   overflow: hidden; flex-shrink: 0; font-size: 13px; user-select: none;
 }
-.captcha-box img { width: 100%; height: 100%; object-fit: cover; }
+.captcha-box img { width: 100%; height: 100%; object-fit: contain; }
 .ink-sub {
   width: 100%; height: 50px; border: 0; border-radius: 12px; font-size: 16px; font-weight: 700;
   letter-spacing: 8px; color: #fff; background: linear-gradient(120deg, var(--primary), var(--primary-2));
@@ -317,7 +317,7 @@ img { max-width: 100%; display: block; }
 .petal { position: absolute; width: 12px; height: 12px; background: rgba(230, 150, 120, 0.45); border-radius: 50% 0 50% 0; animation: fall 13s linear infinite; }
 @keyframes fall { 0% { transform: translateY(-40px) rotate(0); } 100% { transform: translateY(105vh) rotate(360deg); } }
 
-/* ---------- 详情页 ---------- */
+/* ---------- 璇︽儏椤?---------- */
 .detail-top { display: grid; grid-template-columns: 400px 1fr; gap: 28px; background: #fff; border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); border: 1px solid #e8d9c5; }
 .detail-poster { height: 320px; border-radius: var(--radius); background: linear-gradient(135deg, #ff4b2b, #ffb26b); box-shadow: 0 10px 24px rgba(255, 75, 43, 0.2); overflow: hidden; }
 .detail-poster img { width: 100%; height: 100%; object-fit: cover; }
@@ -329,7 +329,7 @@ img { max-width: 100%; display: block; }
 .tier-row .price { color: var(--primary); font-weight: 700; font-size: 18px; }
 .buybar { position: sticky; bottom: 0; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(8px); border-top: 1px solid var(--border); padding: 14px 0; display: flex; gap: 12px; margin-top: 20px; z-index: 20; }
 
-/* ---------- 订单列表 ---------- */
+/* ---------- 璁㈠崟鍒楄〃 ---------- */
 .order-layout { display: grid; grid-template-columns: 184px 1fr; gap: 20px; align-items: start; }
 .side-menu { background: #fff; border-radius: var(--radius); padding: 10px; box-shadow: var(--shadow); height: fit-content; border: 1px solid #e8d9c5; }
 .side-menu a { display: block; padding: 12px 14px; border-radius: 9px; color: var(--text-2); font-size: 14px; transition: 0.15s; cursor: pointer; }
@@ -348,7 +348,7 @@ img { max-width: 100%; display: block; }
 .status-pill.cancelled { background: #f2f2f2; color: #999; }
 .status-pill.refunded { background: #eef2ff; color: #5b6ee1; }
 
-/* ---------- 通用面板 / 表格 ---------- */
+/* ---------- 閫氱敤闈㈡澘 / 琛ㄦ牸 ---------- */
 .panel { background: #fff; border-radius: var(--radius); box-shadow: var(--shadow); padding: 22px; border: 1px solid #e8d9c5; }
 .filters { display: flex; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; align-items: center; }
 table { width: 100%; border-collapse: collapse; font-size: 14px; }
@@ -358,7 +358,7 @@ tbody tr:hover { background: #fffaf6; }
 .link { color: var(--primary); cursor: pointer; margin-right: 10px; }
 .link:hover { text-decoration: underline; }
 
-/* ---------- 券 ---------- */
+/* ---------- 鍒?---------- */
 .coupon-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
 .coupon-card {
   display: flex; background: #fff; border-radius: var(--radius); overflow: hidden;
@@ -380,13 +380,13 @@ tbody tr:hover { background: #fffaf6; }
 .coupon-card .cc-action { margin-top: 10px; }
 .coupon-empty-left { background: #d9d9d9 !important; }
 
-/* ---------- 座位图 ---------- */
+/* ---------- 搴т綅鍥?---------- */
 .seat-legend { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; font-size: 13px; color: var(--text-2); }
 .seat-legend .lg { display: inline-flex; align-items: center; gap: 6px; }
 .seat-legend .dot { width: 15px; height: 15px; border-radius: 4px; border: 1px solid rgba(0, 0, 0, 0.08); }
 .seat-summary { position: sticky; top: 84px; }
 
-/* ---------- 通用工具类 ---------- */
+/* ---------- 閫氱敤宸ュ叿绫?---------- */
 .row { display: flex; align-items: center; }
 .between { display: flex; align-items: center; justify-content: space-between; }
 .gap-8 { gap: 8px; }

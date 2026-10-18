@@ -146,6 +146,9 @@ public class SeckillServiceImpl implements SeckillService {
         outbox.setUpdateTime(now);
         messageOutboxMapper.insert(outbox);
 
+        // 回写票档已售数量（供看板/热度排序）
+        tierPriceMapper.increaseSold(tierId);
+
         log.info("秒杀成功 userId={} tierId={} orderNo={}", userId, tierId, order.getOrderNo());
         return new SeckillResponse(order.getId(), order.getOrderNo(), claim.getMessage());
     }

@@ -12,7 +12,7 @@ import java.util.List;
 
 public interface ProductService {
 
-    PageResult<Product> list(String category, Integer status, String keyword, int page, int pageSize);
+    PageResult<Product> list(String category, Integer status, String keyword, String sort, int page, int pageSize);
 
     Product detail(Long id);
 

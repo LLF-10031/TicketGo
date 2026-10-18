@@ -26,9 +26,10 @@ public class ProductController {
     public Result<PageResult<Product>> list(@RequestParam(required = false) String category,
                                             @RequestParam(required = false) Integer status,
                                             @RequestParam(required = false) String keyword,
+                                            @RequestParam(required = false) String sort,
                                             @RequestParam(defaultValue = "1") int page,
                                             @RequestParam(name = "page_size", defaultValue = "20") int pageSize) {
-        return Result.ok(productService.list(category, status, keyword, page, pageSize));
+        return Result.ok(productService.list(category, status, keyword, sort, page, pageSize));
     }
 
     @GetMapping("/api/product/{id}")

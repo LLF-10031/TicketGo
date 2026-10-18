@@ -50,8 +50,17 @@ public class ProductServiceImpl implements ProductService {
     private static final long PRODUCT_CACHE_SECONDS = 300;
 
     @Override
-    public PageResult<Product> list(String category, Integer status, String keyword, int page, int pageSize) {
-        Page<Product> p = new Page<>(Math.max(page, 1), pageSize <= 0 ? 20 : pageSize);
+    public PageResult<Product> list(String category, Integer status, String keyword, String sort, int page, int pageSize) {
+        int safePage = Math.max(page, 1);
+        int safeSize = pageSize <= 0 ? 20 : pageSize;
+        // 热度排序：按票档已售数量之和
+        if ("hot".equalsIgnoreCase(sort)) {
+            long total = productMapper.countFiltered(category, status, keyword);
+            List<Product> records = productMapper.selectHot(category, status, keyword,
+                    (safePage - 1) * safeSize, safeSize);
+            return PageResult.of(total, records);
+        }
+        Page<Product> p = new Page<>(safePage, safeSize);
         var wrapper = Wrappers.<Product>lambdaQuery();
         if (StringUtils.hasText(category)) {
             wrapper.eq(Product::getCategory, category);

@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ticketgo.common.constant.RedisKeys;
 import com.ticketgo.common.exception.BizException;
 import com.ticketgo.common.result.ResultCode;
+import com.ticketgo.common.util.SnowflakeIdGenerator;
 import com.ticketgo.seat.dto.SeatLockRequest;
 import com.ticketgo.seat.dto.SeatUnlockRequest;
 import com.ticketgo.seat.entity.Seat;
@@ -87,5 +88,37 @@ public class SeatServiceImpl implements SeatService {
             }
         }
         log.info("释放锁座 sessionId={} seats={}", req.sessionId(), req.seatIds());
+    }
+
+    @Override
+    public int generate(Long sessionId, Long tierId, int rows, int cols) {
+        if (sessionId == null || tierId == null || rows <= 0 || cols <= 0) {
+            throw new BizException(ResultCode.PARAM_ERROR);
+        }
+        // 同一场次票档重复生成则先清空，保证幂等
+        seatMapper.delete(Wrappers.<Seat>lambdaQuery()
+                .eq(Seat::getSessionId, sessionId)
+                .eq(Seat::getTierId, tierId));
+        LocalDateTime now = LocalDateTime.now();
+        int count = 0;
+        for (int r = 1; r <= rows; r++) {
+            for (int c = 1; c <= cols; c++) {
+                Seat seat = new Seat();
+                seat.setId(SnowflakeIdGenerator.generateId());
+                seat.setSessionId(sessionId);
+                seat.setTierId(tierId);
+                seat.setRowNo(String.valueOf(r));
+                seat.setColNo(String.valueOf(c));
+                seat.setX(c * 36);
+                seat.setY(r * 36);
+                seat.setStatus(0);
+                seat.setCreateTime(now);
+                seat.setUpdateTime(now);
+                seatMapper.insert(seat);
+                count++;
+            }
+        }
+        log.info("批量生成座位 sessionId={} tierId={} rows={} cols={} count={}", sessionId, tierId, rows, cols, count);
+        return count;
     }
 }

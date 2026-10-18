@@ -6,12 +6,14 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.annotation.Import;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
- * 演出产品服务：演出 / 场次 / 票档 + 图片上传
+ * 演出产品服务：演出 / 场次 / 票档 + 图片上传 + 开票提醒
  */
 @SpringBootApplication
 @EnableDiscoveryClient
+@EnableScheduling
 @MapperScan("com.ticketgo.product.mapper")
 @Import(GlobalExceptionHandler.class)
 public class ProductApplication {

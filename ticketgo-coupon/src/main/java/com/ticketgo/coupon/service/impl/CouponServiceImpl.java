@@ -14,10 +14,14 @@ import com.ticketgo.common.util.SnowflakeIdGenerator;
 import com.ticketgo.coupon.dto.AvailableCoupon;
 import com.ticketgo.coupon.dto.CouponAvailableRequest;
 import com.ticketgo.coupon.dto.CouponBuyRequest;
+import com.ticketgo.coupon.dto.CouponLockRequest;
+import com.ticketgo.coupon.dto.CouponLockResult;
 import com.ticketgo.coupon.entity.CouponTemplate;
 import com.ticketgo.coupon.entity.Order;
+import com.ticketgo.coupon.entity.OrderItem;
 import com.ticketgo.coupon.entity.UserCoupon;
 import com.ticketgo.coupon.mapper.CouponTemplateMapper;
+import com.ticketgo.coupon.mapper.OrderItemMapper;
 import com.ticketgo.coupon.mapper.OrderMapper;
 import com.ticketgo.coupon.mapper.UserCouponMapper;
 import com.ticketgo.coupon.service.CouponService;
@@ -47,6 +51,7 @@ public class CouponServiceImpl implements CouponService {
     private final CouponTemplateMapper templateMapper;
     private final UserCouponMapper userCouponMapper;
     private final OrderMapper orderMapper;
+    private final OrderItemMapper orderItemMapper;
     private final StockClaimEngine stockClaimEngine;
     private final CouponStrategyFactory strategyFactory;
 
@@ -103,13 +108,18 @@ public class CouponServiceImpl implements CouponService {
         }
         CouponTemplate template = getTemplate(req.templateId());
         int quantity = req.quantity() == null || req.quantity() <= 0 ? 1 : req.quantity();
+        int perUserLimit = template.getPerUserLimit() == null || template.getPerUserLimit() <= 0
+                ? 1 : template.getPerUserLimit();
+        if (quantity > perUserLimit) {
+            throw new BizException("超过每人限购数量");
+        }
         BigDecimal price = template.getPrice() == null ? BigDecimal.ZERO : template.getPrice();
         LocalDateTime now = LocalDateTime.now();
         Order order = new Order();
         order.setId(SnowflakeIdGenerator.generateId());
         order.setOrderNo("CP" + DateUtil.format(new Date(), "yyyyMMddHHmmss") + RandomUtil.randomNumbers(6));
         order.setUserId(userId);
-        order.setOrderType(2); // 券订单
+        order.setOrderType(2);
         order.setSessionId(null);
         order.setTotalAmount(price.multiply(BigDecimal.valueOf(quantity)));
         order.setStatus(0);
@@ -117,6 +127,18 @@ public class CouponServiceImpl implements CouponService {
         order.setCreateTime(now);
         order.setUpdateTime(now);
         orderMapper.insert(order);
+
+        // 券订单明细：tier_id 复用为 templateId，供支付成功后发券
+        OrderItem item = new OrderItem();
+        item.setId(SnowflakeIdGenerator.generateId());
+        item.setOrderId(order.getId());
+        item.setTierId(template.getId());
+        item.setSeatId(null);
+        item.setPrice(price);
+        item.setQuantity(quantity);
+        item.setCreateTime(now);
+        orderItemMapper.insert(item);
+
         log.info("购买券下单成功 userId={} templateId={} quantity={} orderNo={}",
                 userId, req.templateId(), quantity, order.getOrderNo());
         return order.getId();
@@ -164,6 +186,87 @@ public class CouponServiceImpl implements CouponService {
         }
         result.sort(Comparator.comparing(AvailableCoupon::payAmount));
         return result;
+    }
+
+    @Override
+    public CouponLockResult lock(CouponLockRequest req) {
+        if (req == null || req.userCouponId() == null || req.orderId() == null || req.amount() == null) {
+            throw new BizException(ResultCode.PARAM_ERROR);
+        }
+        UserCoupon coupon = userCouponMapper.selectById(req.userCouponId());
+        if (coupon == null) {
+            throw new BizException("优惠券不存在");
+        }
+        if (req.userId() != null && !req.userId().equals(coupon.getUserId())) {
+            throw new BizException("优惠券不属于当前用户");
+        }
+        if (coupon.getStatus() == null || coupon.getStatus() != 0) {
+            throw new BizException("优惠券不可用");
+        }
+        if (coupon.getExpireAt() != null && coupon.getExpireAt().isBefore(LocalDateTime.now())) {
+            throw new BizException("优惠券已过期");
+        }
+        CouponTemplate template = templateMapper.selectById(coupon.getTemplateId());
+        if (template == null) {
+            throw new BizException("券模板不存在");
+        }
+        if (!inScope(template, req.productId())) {
+            throw new BizException("该券不适用于当前演出");
+        }
+        CouponStrategy strategy = strategyFactory.get(template.getType());
+        if (strategy == null || !strategy.applicable(req.amount(), template)) {
+            throw new BizException("未达到优惠券使用条件");
+        }
+        BigDecimal payAmount = strategy.calculate(req.amount(), template);
+        BigDecimal discount = req.amount().subtract(payAmount);
+
+        coupon.setStatus(1); // 锁定
+        coupon.setLockOrderId(req.orderId());
+        coupon.setUpdateTime(LocalDateTime.now());
+        userCouponMapper.updateById(coupon);
+        return new CouponLockResult(payAmount, discount);
+    }
+
+    @Override
+    public void issue(Long orderId) {
+        if (orderId == null) {
+            return;
+        }
+        Order order = orderMapper.selectById(orderId);
+        if (order == null || order.getOrderType() == null || order.getOrderType() != 2) {
+            return;
+        }
+        List<OrderItem> items = orderItemMapper.selectList(Wrappers.<OrderItem>lambdaQuery()
+                .eq(OrderItem::getOrderId, orderId));
+        LocalDateTime now = LocalDateTime.now();
+        for (OrderItem item : items) {
+            CouponTemplate template = templateMapper.selectById(item.getTierId());
+            if (template == null) {
+                continue;
+            }
+            Long exist = userCouponMapper.selectCount(Wrappers.<UserCoupon>lambdaQuery()
+                    .eq(UserCoupon::getSourceOrderId, orderId)
+                    .eq(UserCoupon::getTemplateId, template.getId())
+                    .eq(UserCoupon::getUserId, order.getUserId()));
+            if (exist != null && exist > 0) {
+                continue; // 幂等
+            }
+            int qty = item.getQuantity() == null ? 1 : item.getQuantity();
+            for (int i = 0; i < qty; i++) {
+                UserCoupon uc = new UserCoupon();
+                uc.setId(SnowflakeIdGenerator.generateId());
+                uc.setUserId(order.getUserId());
+                uc.setTemplateId(template.getId());
+                uc.setStatus(0);
+                uc.setSourceOrderId(orderId);
+                uc.setReceivedAt(now);
+                uc.setExpireAt(computeExpire(template, now));
+                uc.setCreateTime(now);
+                uc.setUpdateTime(now);
+                userCouponMapper.insert(uc);
+            }
+        }
+        log.info("券订单发券完成 orderId={}", orderId);
     }
 
     @Override

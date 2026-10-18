@@ -17,10 +17,14 @@ spring:
           uri: lb://ticketgo-user
           predicates:
             - Path=/api/user/**,/api/captcha,/api/sms/**
+        - id: seat-session-seats
+          uri: lb://ticketgo-seat
+          predicates:
+            - Path=/api/session/*/seats
         - id: product-service
           uri: lb://ticketgo-product
           predicates:
-            - Path=/api/product/**,/api/session/**,/api/file/**
+            - Path=/api/product/**,/api/session/**,/api/file/**,/api/reminder/**
         - id: seat-service
           uri: lb://ticketgo-seat
           predicates:
@@ -49,6 +53,14 @@ spring:
           uri: lb://ticketgo-notification
           predicates:
             - Path=/api/notification/**
+        - id: admin-seat
+          uri: lb://ticketgo-seat
+          predicates:
+            - Path=/api/admin/session/*/seats/**
+        - id: admin-dashboard
+          uri: lb://ticketgo-order
+          predicates:
+            - Path=/api/admin/dashboard
         - id: admin-product
           uri: lb://ticketgo-product
           predicates:

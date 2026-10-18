@@ -4,6 +4,8 @@ import com.ticketgo.common.result.PageResult;
 import com.ticketgo.coupon.dto.AvailableCoupon;
 import com.ticketgo.coupon.dto.CouponAvailableRequest;
 import com.ticketgo.coupon.dto.CouponBuyRequest;
+import com.ticketgo.coupon.dto.CouponLockRequest;
+import com.ticketgo.coupon.dto.CouponLockResult;
 import com.ticketgo.coupon.entity.CouponTemplate;
 import com.ticketgo.coupon.entity.UserCoupon;
 
@@ -26,4 +28,10 @@ public interface CouponService {
     CouponTemplate updateTemplate(Long id, CouponTemplate template);
 
     void publish(Long id);
+
+    /** 下单锁券：校验可用 + 计算抵扣 + 置 LOCKED 并绑定订单 */
+    CouponLockResult lock(CouponLockRequest req);
+
+    /** 券订单支付成功后发放用户券（按订单明细，幂等） */
+    void issue(Long orderId);
 }

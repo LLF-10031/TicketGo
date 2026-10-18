@@ -20,6 +20,7 @@ import com.ticketgo.order.ws.OrderNotifyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -39,6 +40,10 @@ public class OrderServiceImpl implements OrderService {
     private final UserCouponMapper userCouponMapper;
     private final StockClaimEngine stockClaimEngine;
     private final OrderNotifyService notifyService;
+    private final RestTemplate restTemplate;
+
+    @org.springframework.beans.factory.annotation.Value("${ticketgo.coupon.base-url:http://127.0.0.1:8087}")
+    private String couponBaseUrl;
 
     @Override
     public PageResult<Order> list(Long userId, Integer status, int page, int pageSize) {
@@ -112,6 +117,15 @@ public class OrderServiceImpl implements OrderService {
             }
         }
         userCouponMapper.useByOrder(id);
+        // 券订单支付成功 → 发放用户券（幂等）
+        if (order.getOrderType() != null && order.getOrderType() == 2) {
+            try {
+                restTemplate.postForObject(couponBaseUrl + "/api/coupon/issue/" + id, null, String.class);
+                log.info("券订单发券调用成功 orderId={}", id);
+            } catch (Exception e) {
+                log.warn("券订单发券调用失败 orderId={}：{}", id, e.getMessage());
+            }
+        }
         notifyService.send(order.getUserId(), "ORDER_STATUS", "PAID");
         log.info("订单支付成功 orderNo={}", order.getOrderNo());
     }

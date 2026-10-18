@@ -13,4 +13,7 @@ public interface SeatService {
     String lock(SeatLockRequest req);
 
     void unlock(SeatUnlockRequest req);
+
+    /** 管理端：按 排×列 批量生成座位 */
+    int generate(Long sessionId, Long tierId, int rows, int cols);
 }

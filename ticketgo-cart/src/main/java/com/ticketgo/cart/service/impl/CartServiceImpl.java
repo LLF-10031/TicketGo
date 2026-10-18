@@ -18,13 +18,17 @@ import com.ticketgo.common.result.ResultCode;
 import com.ticketgo.common.util.SnowflakeIdGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -35,6 +39,10 @@ public class CartServiceImpl implements CartService {
     private final OrderMapper orderMapper;
     private final OrderItemMapper orderItemMapper;
     private final TierPriceMapper tierPriceMapper;
+    private final RestTemplate restTemplate;
+
+    @Value("${ticketgo.coupon.base-url:http://127.0.0.1:8087}")
+    private String couponBaseUrl;
 
     private static final int PAY_EXPIRE_MINUTES = 15;
 
@@ -105,13 +113,18 @@ public class CartServiceImpl implements CartService {
             }
             total = total.add(price.multiply(BigDecimal.valueOf(cart.getQuantity())));
         }
+        long orderId = SnowflakeIdGenerator.generateId();
+        BigDecimal payAmount = total;
+        if (req.userCouponId() != null) {
+            payAmount = lockCoupon(req.userCouponId(), orderId, userId, total, req.productId());
+        }
         Order order = new Order();
-        order.setId(SnowflakeIdGenerator.generateId());
+        order.setId(orderId);
         order.setOrderNo("TG" + DateUtil.format(new Date(), "yyyyMMddHHmmss") + RandomUtil.randomNumbers(6));
         order.setUserId(userId);
         order.setOrderType(1);
         order.setSessionId(carts.get(0).getSessionId());
-        order.setTotalAmount(total);
+        order.setTotalAmount(payAmount);
         order.setStatus(0);
         order.setPayExpireAt(now.plusMinutes(PAY_EXPIRE_MINUTES));
         order.setCreateTime(now);
@@ -131,7 +144,32 @@ public class CartServiceImpl implements CartService {
             orderItemMapper.insert(item);
             cartMapper.deleteById(cart.getId());
         }
-        log.info("购物车结算生成订单 orderNo={} amount={}", order.getOrderNo(), total);
+        log.info("购物车结算生成订单 orderNo={} amount={}", order.getOrderNo(), payAmount);
         return order.getId();
+    }
+
+    /** 调用券服务锁券并返回抵扣后应付金额 */
+    @SuppressWarnings("unchecked")
+    private BigDecimal lockCoupon(Long userCouponId, Long orderId, Long userId, BigDecimal amount, Long productId) {
+        try {
+            Map<String, Object> body = new HashMap<>();
+            body.put("userCouponId", userCouponId);
+            body.put("orderId", orderId);
+            body.put("userId", userId);
+            body.put("amount", amount);
+            body.put("productId", productId);
+            Map<String, Object> resp = restTemplate.postForObject(couponBaseUrl + "/api/coupon/lock", body, Map.class);
+            Object code = resp == null ? null : resp.get("code");
+            Object data = resp == null ? null : resp.get("data");
+            if (code != null && "200".equals(String.valueOf(code)) && data instanceof Map<?, ?> d) {
+                return new BigDecimal(String.valueOf(d.get("payAmount")));
+            }
+            throw new BizException("优惠券不可用，请重新选择");
+        } catch (BizException e) {
+            throw e;
+        } catch (Exception e) {
+            log.warn("锁券失败 couponId={}：{}", userCouponId, e.getMessage());
+            throw new BizException("优惠券服务不可用，请稍后重试");
+        }
     }
 }

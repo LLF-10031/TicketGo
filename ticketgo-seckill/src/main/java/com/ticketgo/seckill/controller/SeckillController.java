@@ -30,8 +30,10 @@ public class SeckillController {
     @PostMapping("/api/seckill/{sessionId}/{tierId}")
     public Result<SeckillResponse> seckill(@RequestHeader("X-User-Id") Long userId,
                                            @PathVariable Long sessionId,
-                                           @PathVariable Long tierId) {
-        return Result.ok(seckillService.seckill(userId, sessionId, tierId));
+                                           @PathVariable Long tierId,
+                                           @RequestParam(name = "userCouponId", required = false) Long userCouponId,
+                                           @RequestParam(name = "productId", required = false) Long productId) {
+        return Result.ok(seckillService.seckill(userId, sessionId, tierId, userCouponId, productId));
     }
 
     @PostMapping("/api/seckill/warmup/{tierId}")

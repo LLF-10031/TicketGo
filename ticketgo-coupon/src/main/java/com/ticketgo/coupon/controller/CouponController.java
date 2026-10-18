@@ -59,4 +59,17 @@ public class CouponController {
                                                    @RequestBody CouponAvailableRequest req) {
         return Result.ok(couponService.available(userId, req));
     }
+
+    /** 下单锁券（内部/前端调用）：校验 + 算抵扣 + 锁定 */
+    @PostMapping("/api/coupon/lock")
+    public Result<com.ticketgo.coupon.dto.CouponLockResult> lock(@RequestBody com.ticketgo.coupon.dto.CouponLockRequest req) {
+        return Result.ok(couponService.lock(req));
+    }
+
+    /** 券订单支付成功后发券（内部调用，幂等） */
+    @PostMapping("/api/coupon/issue/{orderId}")
+    public Result<Void> issue(@PathVariable Long orderId) {
+        couponService.issue(orderId);
+        return Result.ok();
+    }
 }

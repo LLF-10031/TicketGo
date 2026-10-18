@@ -250,3 +250,17 @@ CREATE TABLE IF NOT EXISTS `t_notification` (
   PRIMARY KEY (`id`),
   KEY `idx_user_time` (`user_id`,`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='通知/站内信';
+
+-- 开票提醒
+CREATE TABLE IF NOT EXISTS `t_reminder` (
+  `id` BIGINT NOT NULL,
+  `user_id` BIGINT NOT NULL,
+  `product_id` BIGINT DEFAULT NULL,
+  `session_id` BIGINT NOT NULL,
+  `remind_at` DATETIME NOT NULL,
+  `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0待提醒 1已提醒 2已取消',
+  `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_remind` (`status`,`remind_at`),
+  KEY `idx_user` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='开票提醒';

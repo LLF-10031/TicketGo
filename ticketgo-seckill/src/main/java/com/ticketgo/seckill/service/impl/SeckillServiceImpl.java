@@ -23,10 +23,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 秒杀核心：Lua 原子扣库存 + 一人一单 → 同事务写订单 + 本地消息表 → 定时投递 Kafka。
@@ -41,15 +44,19 @@ public class SeckillServiceImpl implements SeckillService {
     private final OrderItemMapper orderItemMapper;
     private final MessageOutboxMapper messageOutboxMapper;
     private final TierPriceMapper tierPriceMapper;
+    private final RestTemplate restTemplate;
 
     @Value("${ticketgo.kafka.order-topic:order-created}")
     private String orderTopic;
+
+    @Value("${ticketgo.coupon.base-url:http://127.0.0.1:8087}")
+    private String couponBaseUrl;
 
     private static final int PAY_EXPIRE_MINUTES = 15;
     private static final int PER_USER_LIMIT = 1;
 
     @Override
-    public SeckillResponse seckill(Long userId, Long sessionId, Long tierId) {
+    public SeckillResponse seckill(Long userId, Long sessionId, Long tierId, Long userCouponId, Long productId) {
         if (userId == null || sessionId == null || tierId == null) {
             throw new BizException(ResultCode.PARAM_ERROR);
         }
@@ -67,16 +74,47 @@ public class SeckillServiceImpl implements SeckillService {
         if (price == null) {
             price = BigDecimal.ZERO;
         }
+        long orderId = SnowflakeIdGenerator.generateId();
+        BigDecimal payAmount = price;
+
+        // ①.5 可选：锁券并计算抵扣（失败则回补库存）
+        if (userCouponId != null) {
+            try {
+                Map<String, Object> body = new HashMap<>();
+                body.put("userCouponId", userCouponId);
+                body.put("orderId", orderId);
+                body.put("userId", userId);
+                body.put("amount", price);
+                body.put("productId", productId);
+                @SuppressWarnings("unchecked")
+                Map<String, Object> resp = restTemplate.postForObject(couponBaseUrl + "/api/coupon/lock", body, Map.class);
+                Object code = resp == null ? null : resp.get("code");
+                Object data = resp == null ? null : resp.get("data");
+                if (code != null && "200".equals(String.valueOf(code)) && data instanceof Map<?, ?> d) {
+                    payAmount = new BigDecimal(String.valueOf(d.get("payAmount")));
+                } else {
+                    restoreStock(tierId, userId);
+                    throw new BizException("优惠券不可用，请重新选择");
+                }
+            } catch (BizException e) {
+                throw e;
+            } catch (Exception e) {
+                log.warn("锁券失败 tierId={} couponId={}: {}", tierId, userCouponId, e.getMessage());
+                restoreStock(tierId, userId);
+                throw new BizException("优惠券服务不可用，请稍后重试");
+            }
+        }
+
         LocalDateTime now = LocalDateTime.now();
 
         // ② 同库事务：订单 + 明细 + 本地消息表
         Order order = new Order();
-        order.setId(SnowflakeIdGenerator.generateId());
+        order.setId(orderId);
         order.setOrderNo("TG" + DateUtil.format(new Date(), "yyyyMMddHHmmss") + RandomUtil.randomNumbers(6));
         order.setUserId(userId);
         order.setOrderType(1);
         order.setSessionId(sessionId);
-        order.setTotalAmount(price);
+        order.setTotalAmount(payAmount);
         order.setStatus(0);
         order.setPayExpireAt(now.plusMinutes(PAY_EXPIRE_MINUTES));
         order.setCreateTime(now);
@@ -116,6 +154,11 @@ public class SeckillServiceImpl implements SeckillService {
     public void warmUp(Long tierId, long stock) {
         stockClaimEngine.warmUp(RedisKeys.stock(tierId), stock);
         log.info("库存预热 tierId={} stock={}", tierId, stock);
+    }
+
+    private void restoreStock(Long tierId, Long userId) {
+        stockClaimEngine.restore(RedisKeys.stock(tierId), 1);
+        stockClaimEngine.releaseUser(RedisKeys.seckillUsers(tierId), userId, 1);
     }
 
     private ResultCode toResultCode(ClaimResult claim) {

@@ -45,7 +45,7 @@ logging:
   level:
     com.ticketgo: debug
 
-# ---- Seata（默认关闭，使用 --spring.profiles.active=seata 启用�?---
+# ---- Seata (disabled by default; enable with --spring.profiles.active=seata) ----
 seata:
   enabled: false
 ---
@@ -60,9 +60,9 @@ seata:
   service:
     vgroup-mapping:
       ticketgo-tx-group: default
+    grouplist:
+      default: 127.0.0.1:8091
   registry:
-    type: nacos
-    nacos:
-      server-addr: 127.0.0.1:8848
-      application: seata-server
-      group: DEFAULT_GROUP
+    type: file
+  config:
+    type: file
